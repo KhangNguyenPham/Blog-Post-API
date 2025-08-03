@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, NotFoundException, Query } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -15,8 +15,8 @@ export class PostController {
   }
 
   @Get()
-  async findAll(): Promise<{ status: boolean; data: PostEntity[] }> {
-    const data = await this.postService.findAll();
+  async findAll(@Query('sort') sort?: string, @Query('search') search?: string): Promise<{ status: boolean; data: PostEntity[] }> {
+    const data = await this.postService.findAll(sort, search);
     
     return {
       status: true,
@@ -59,6 +59,16 @@ export class PostController {
   @Get('/category/:categoryId')
   async findByCategory(@Param('categoryId') categoryId: string): Promise<{ status: boolean; data: PostEntity[] }> {
     const posts = await this.postService.findByCategory(categoryId);
+    
+    return {
+      status: true,
+      data: posts,
+    };
+  }
+
+  @Get('/author/:authorId')
+  async findByAuthor(@Param('authorId') authorId: string): Promise<{ status: boolean; data: PostEntity[] }> {
+    const posts = await this.postService.findByAuthor(authorId);
     
     return {
       status: true,

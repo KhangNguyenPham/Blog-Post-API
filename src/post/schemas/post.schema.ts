@@ -15,6 +15,9 @@ export class Post {
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
   category_id: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'Author', required: true })
+  author_id: Types.ObjectId;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 }

@@ -14,8 +14,70 @@ export class PostService {
     return createdPost.save();
   }
 
-  async findAll(): Promise<Post[]> {
-    return this.postModel.find().exec();
+  async findAll(sortBy?: string, search?: string): Promise<any> {
+    let query = this.postModel.find();
+    
+    query = query.populate('author_id', 'name email').populate('category_id', 'name');
+
+    if (search) {
+      query = query.find({
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { content: { $regex: search, $options: 'i' } }
+        ]
+      });
+    }
+
+    // if (sortBy === 'createdAt') {
+    //   query = query.sort({ createdAt: 1 });
+    // } else if (sortBy === '-createdAt') {
+    //   query = query.sort({ createdAt: -1 });
+    // } else if (sortBy === 'title') {
+    //   query = query.sort({ title: 1 });
+    // } else if (sortBy === '-title') {
+    //   query = query.sort({ title: -1 });
+    // } else {
+    //   query = query.sort({ createdAt: -1 });
+    // }
+
+    if (sortBy) {
+      const sortFields = sortBy.split(',');
+      const sortObject: any = {};
+      
+      for (const field of sortFields) {
+        const trimmedField = field.trim();
+        const sortOrder = trimmedField.startsWith('-') ? -1 : 1;
+        const fieldName = trimmedField.startsWith('-') ? trimmedField.substring(1) : trimmedField;
+        const allowedFields = ['createdAt', 'title'];
+
+        if (allowedFields.includes(fieldName)) {
+          sortObject[fieldName] = sortOrder;
+        }
+      }
+      
+      if (Object.keys(sortObject).length > 0) {
+        query = query.sort(sortObject);
+      } else {
+        query = query.sort({ createdAt: -1 });
+      }
+    } else {
+      query = query.sort({ createdAt: -1 });
+    }
+    
+    //return query.exec();
+
+    const posts = await query.exec();
+
+    return posts.map(post => {
+      const postObj = post.toObject();
+      return {
+        ...postObj,
+        category: postObj.category_id,
+        category_id: undefined,
+        author:postObj.author_id,
+        author_id: undefined
+      };
+    });
   }
 
   async findOne(id: string): Promise<Post> {
@@ -45,5 +107,9 @@ export class PostService {
   async findByCategory(categoryId: string): Promise<Post[]> {
     //return this.postModel.find({ category_id: categoryId }).populate('category').exec();
     return this.postModel.find({ category_id: categoryId }).exec();
+  }
+
+  async findByAuthor(authorId: string): Promise<Post[]> {
+    return this.postModel.find({ author_id: authorId }).exec();
   }
 }

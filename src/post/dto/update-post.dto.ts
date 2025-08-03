@@ -12,4 +12,8 @@ export class UpdatePostDto {
   @IsString()
   @IsNotEmpty()
   category_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  author_id: string;
 }

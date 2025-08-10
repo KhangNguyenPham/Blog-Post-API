@@ -8,5 +8,4 @@ export class UpdatePostDto {
   @IsOptional()
   @IsString()
   content: string;
-
 }

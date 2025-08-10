@@ -9,11 +9,4 @@ export class UpdatePostDto {
   @IsString()
   content: string;
 
-  @IsString()
-  @IsNotEmpty()
-  category_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  author_id: string;
 }
